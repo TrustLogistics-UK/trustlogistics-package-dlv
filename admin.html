@@ -1,1 +1,71 @@
 
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - TrustLogistics</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}header{background:#0a2540;color:#fff;padding:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}#map{height:55vh;width:100%}.bar{padding:10px;background:#eef2ff;display:flex;gap:8px;flex-wrap:wrap}.btn{background:#0066ff;color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;text-decoration:none;display:inline-block}.btn.red{background:#ef4444}.btn.green{background:#16a34a}.btn.dark{background:#0a2540}.status{background:#fff;padding:12px;margin:10px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}</style></head><body>
+<script>if(localStorage.getItem('trust_user')!=='Admin'){location.replace('index.html');}</script>
+<header><h3>Admin Panel - REF: Allan/DF/110</h3><div><a href="tracking.html" class="btn dark">View Tracking</a> <a href="index.html" class="btn red" onclick="localStorage.clear();">Logout</a></div></header>
+<div id="map"></div>
+<div class="bar">
+<button class="btn red" id="pauseBtn">⏸ Pause Trip</button>
+<button class="btn green" id="playBtn">▶ Play Trip</button>
+<button class="btn dark" id="resetBtn">🔄 Reset 8hr Trip</button>
+<a href="tracking.html" class="btn">Go to Allan's Page →</a>
+</div>
+<div class="status" id="statusBox">Loading admin...</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app = initializeApp({projectId:"trustlogistics-package-dlv"}); const db = getFirestore(app);
+const DOC_ID = "ALLAN_DF_110_SHARED_TRIP_THORNTON_MORPETH";
+const map = L.map('map').setView([55.17,-1.77],11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let marker, routeLineOuter, routeLineInner;
+const THORNTON=[55.174,-1.8476], MORPETH=[55.1674,-1.6911];
+let route=[THORNTON,MORPETH];
+
+async function getRoute(){
+ try{
+  const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${THORNTON[1]},${THORNTON[0]};${MORPETH[1]},${MORPETH[0]}?overview=full&geometries=geojson`);
+  const j=await r.json(); if(j.routes&&j.routes[0]) route=j.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+ }catch(e){}
+ if(routeLineOuter) map.removeLayer(routeLineOuter);
+ if(routeLineInner) map.removeLayer(routeLineInner);
+ routeLineOuter=L.polyline(route,{color:"#ffffff",weight:7}).addTo(map);
+ routeLineInner=L.polyline(route,{color:"#4285F4",weight:4}).addTo(map);
+ map.fitBounds(routeLineOuter.getBounds(),{padding:[30,30]});
+}
+
+function interp(rt,t){const tot=rt.length-1, idx=t*tot, i=Math.floor(idx), f=idx-i; if(i>=tot)return rt[tot]; const a=rt[i], b=rt[i+1]; return[a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f];}
+
+async function loadTrip(){ 
+ const snap=await getDoc(doc(db,"packages",DOC_ID));
+ if(snap.exists()) return snap.data();
+ return {startTime:Date.now(), durationMs:8*60*60*1000, isPaused:false, pausedAt:0, accumulatedPause:0};
+}
+
+function getPos(data){
+ let prog;
+ if(data.isPaused){ prog=(data.pausedAt-data.startTime-data.accumulatedPause)/data.durationMs; }
+ else { prog=(Date.now()-data.startTime-data.accumulatedPause)/data.durationMs; }
+ if(prog>0.998) prog=0.998; if(prog<0) prog=0;
+ return {prog, pos:interp(route, prog)};
+}
+
+let currentData;
+async function refresh(){
+ currentData=await loadTrip();
+ const {prog,pos}=getPos(currentData);
+ if(!marker) marker=L.marker(pos).addTo(map); else marker.setLatLng(pos);
+ document.getElementById('statusBox').innerHTML=`<b>REF:</b> Allan/DF/110 | VIN: H43245/IMEI/1001<br><b>Progress:</b> ${(prog*100).toFixed(2)}%<br><b>Paused:</b> ${currentData.isPaused}<br><b>Van:</b> ${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}<br><b>Route:</b> Thornton UK [55.174,-1.8476] → Morpeth [55.1674,-1.6911]`;
+}
+await getRoute(); await refresh(); setInterval(refresh,2000);
+
+document.getElementById('pauseBtn').onclick=async()=>{
+ const d=await loadTrip(); if(!d.isPaused){ d.isPaused=true; d.pausedAt=Date.now(); await setDoc(doc(db,"packages",DOC_ID), d); alert('Trip Paused'); }
+};
+document.getElementById('playBtn').onclick=async()=>{
+ const d=await loadTrip(); if(d.isPaused){ d.accumulatedPause+=(Date.now()-d.pausedAt); d.isPaused=false; d.pausedAt=0; await setDoc(doc(db,"packages",DOC_ID), d); alert('Trip Resumed'); }
+};
+document.getElementById('resetBtn').onclick=async()=>{
+ const newTrip={startTime:Date.now(), durationMs:8*60*60*1000, isPaused:false, pausedAt:0, accumulatedPause:0};
+ await setDoc(doc(db,"packages",DOC_ID), newTrip); localStorage.setItem('tl_shared_start_thornton', Date.now()); alert('Trip Reset to 8 hours');
+};
+</script></body></html>
