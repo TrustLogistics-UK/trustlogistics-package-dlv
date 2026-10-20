@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - TrustLogistics</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#f0f2f5}
+header{background:#0a2540;color:#fff;padding:12px;text-align:center;position:sticky;top:0;z-index:10}
+.tabs{display:flex;overflow-x:auto;gap:6px;padding:8px;background:#fff;border-bottom:2px solid #0066ff}
+.tab{padding:8px 12px;border:1px solid #ddd;border-radius:20px;white-space:nowrap;cursor:pointer}
+.tab.active{background:#0066ff;color:#fff;border-color:#0066ff}
+#map{height:62vh;width:100%;transition:all .3s}
+#map.enlarged{height:90vh;position:fixed;top:48px;left:0;right:0;bottom:0;z-index:999}
+.panel{background:#fff;margin:8px;padding:12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+input,select{padding:10px;border:1px solid #ccc;border-radius:8px;flex:1;min-width:140px}
+.btn{background:#0066ff;color:#fff;border:none;padding:10px 14px;border-radius:8px;font-weight:bold;cursor:pointer}
+.btn.ghost{background:#eef2ff;color:#0066ff}
+.btn.red{background:#ff2d2d}
+.badge{background:#e6f0ff;color:#0066ff;padding:4px 8px;border-radius:12px;font-size:12px}
+</style>
+</head>
+<body>
+<header><h2>TrustLogistics Admin Panel</h2><small>Project: trustlogistics-package-dlv</small></header>
+<div class="tabs" id="mapTabs"></div>
+<div id="map"></div>
+<div class="panel">
+<div class="row">
+<span class="badge" id="curMapName">Map 1: OSM Standard</span>
+<button class="btn ghost" onclick="toggleEnlarge()">⛶ Enlarge</button>
+<button class="btn ghost" id="pauseBtn" onclick="togglePause()">⏸️ Pause</button>
+<button class="btn ghost" onclick="map.zoomIn()">Zoom +</button>
+<button class="btn ghost" onclick="map.zoomOut()">Zoom -</button>
+</div>
+<div class="row">
+<input id="trackingId" placeholder="Tracking ID e.g. TL-1234" value="TL-123">
+<input id="originName" placeholder="Origin e.g. London">
+<input id="destName" placeholder="Destination e.g. Manchester">
+</div>
+<div class="row">
+<input id="originLatLng" placeholder="Origin lat,lng e.g. 51.5,-0.12">
+<input id="destLatLng" placeholder="Dest lat,lng e.g. 53.48,-2.24">
+<select id="status"><option>In Transit</option><option>Out for Delivery</option><option>Delivered</option><option>On Hold</option></select>
+</div>
+<div class="row">
+<input id="eta" placeholder="ETA e.g. Today 6pm">
+<button class="btn" onclick="updateLocation()">Update Live Location</button>
+<button class="btn red" onclick="moveMarker()">Move Marker (Simulate)</button>
+</div>
+<div class="row">
+<button class="btn ghost" onclick="drawRealRoute()">Draw REAL UK Road Route (not straight line)</button>
+<button class="btn ghost" onclick="shareLink()">Copy Customer Link</button>
+</div>
+<p style="font-size:12px;color:#666;margin-top:6px">Swipe tabs above to switch 10 map styles. Customer page has ONLY zoom. Admin has Pause/Play, Enlarge, Swipe, Route.</p>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = { projectId:"trustlogistics-package-dlv" };
+const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+
+const mapStyles = [
+ {name:"1: OSM Standard",url:"https 
