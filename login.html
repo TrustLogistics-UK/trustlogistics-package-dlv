@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login - TrustLogistics</title>
+<style>body{background:#0a2540;display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial} .box{background:#fff;padding:24px;border-radius:16px;width:92%;max-width:340px;box-shadow:0 10px 30px rgba(0,0,0,.3)} input{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:10px} button{width:100%;padding:12px;background:#0066ff;color:#fff;border:0;border-radius:10px;font-weight:bold;margin-top:10px} h2{text-align:center;margin-bottom:10px}</style>
+</head><body>
+<div class="box">
+<h2>TrustLogistics Login</h2>
+<input id="f1" placeholder="Enter password" type="password">
+<input id="f2" placeholder="Confirm password" type="password">
+<button onclick="login()">Login</button>
+<p id="msg" style="color:red;text-align:center;margin-top:8px"></p>
+</div>
+<script>
+function login(){
+ const a=document.getElementById('f1').value.trim();
+ const b=document.getElementById('f2').value.trim();
+ if(a==='Admin' && b==='Admin'){
+   localStorage.setItem('trust_admin','yes');
+   location.href='admin.html';
+ }else{
+   document.getElementById('msg').innerText='Invalid credentials. Use Admin in both fields.';
+ }
+}
+</script>
+</body></html> 
