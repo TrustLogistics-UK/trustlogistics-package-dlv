@@ -7,10 +7,10 @@ header::before{content:'';position:absolute;inset:0;background:linear-gradient(9
 .hdr{position:relative;z-index:2;max-width:1300px;margin:0 auto;}
 .header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .left-group{display:flex;align-items:flex-start;gap:11px}
-.logo{width:52px;height:52px;background:#fff;border-radius:13px;display:grid;place-items:center;overflow:hidden;padding:0;flex-shrink:0;margin-top:0px;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.logo{width:52px;height:52px;background:#fff;border-radius:13px;display:grid;place-items:center;overflow:hidden;padding:0;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
 .logo svg{width:100%;height:100%}
 .title-group{padding-top:1px}
-.title-group h2{font-size:19px;font-weight:900;line-height:1.1;color:#fff;letter-spacing:0.2px}
+.title-group h2{font-size:19px;font-weight:900;line-height:1.1;color:#fff}
 .route-line{font-size:12.5px;font-weight:500;color:#cbd5e1;margin-top:3px}
 .logout-btn{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.35);padding:7px 14px;border-radius:20px;font-size:11px;font-weight:800;text-decoration:none;white-space:nowrap;flex-shrink:0;margin-top:2px}
 .meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-left:63px}
@@ -18,32 +18,27 @@ header::before{content:'';position:absolute;inset:0;background:linear-gradient(9
 .gpsBox{background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.25);padding:8px 14px;border-radius:13px;margin-top:9px;margin-left:63px;max-width:520px}
 .gpsTitle{font-size:12.5px;font-weight:800;color:#fff}
 .gpsStatus{font-size:11px;font-weight:700;margin-top:3px;color:#e2e8f0}
-.main{max-width:1300px;margin:14px auto;padding:0 12px;display:flex;gap:18px;align-items:flex-start}
-.left-col{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0}
-.map-card{background:#fff;padding:9px;border-radius:20px;border:2px solid #0a2540;box-shadow:0 10px 30px rgba(0,0,0,0.1)}
+.main{max-width:1300px;margin:14px auto;padding:0 12px;display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.left-col{flex:1 1 620px;display:flex;flex-direction:column;gap:14px;min-width:280px;width:100%}
+.map-card{background:#fff;padding:9px;border-radius:20px;border:2px solid #0a2540;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:100%}
 .map-square{width:100%;height:480px;border-radius:12px;overflow:hidden}#map{width:100%;height:100%}
-.info{background:#fff;border-radius:18px;padding:16px;border:1px solid #e2e8f0}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-.badge{background:#eef2ff;padding:8px 12px;border-radius:20px;font-size:12px;border:1px solid #dbe2ff;color:#0a2540;font-weight:600}
-.badge.dark{background:#0a2540;color:#fff}
-.right-col{flex:0 0 360px;width:360px;display:flex;flex-direction:column;gap:10px}
-.vehicle-img-card{background:#fff;padding:8px;border-radius:20px;border:1px solid #e2e8f0;overflow:hidden}
+.info{background:#fff;border-radius:18px;padding:16px;border:1px solid #e2e8f0;width:100%;display:block}
+.info h4{font-size:15px;font-weight:800;color:#0a2540;line-height:1.4;white-space:normal;word-wrap:break-word;margin-bottom:10px}
+.row{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;margin:8px 0;width:100%;align-items:center}
+.badge{display:inline-flex;align-items:center;background:#eef2ff;padding:8px 12px;border-radius:20px;font-size:12px;border:1px solid #dbe2ff;color:#0a2540;font-weight:600;white-space:nowrap;max-width:100%;word-break:break-all}
+.badge.dark{background:#0a2540;color:#fff;border-color:#0a2540}
+.right-col{flex:0 1 360px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px}
+.vehicle-img-card{background:#fff;padding:8px;border-radius:20px;border:1px solid #e2e8f0;overflow:hidden;width:100%}
 .vehicle-img{width:100%;height:230px;object-fit:cover;border-radius:12px;display:block}
-.vbox{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px}
+.vbox{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;width:100%}
 .vbox b{display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
 .vbox span{font-size:13px;font-weight:700;color:#0a2540}
-@media(max-width:600px){.meta-row{margin-left:0}.gpsBox{margin-left:0}.logo{width:46px;height:46px}}
+@media(max-width:900px){.main{flex-direction:column}.left-col{flex:1 1 100%;width:100%}.right-col{flex:1 1 100%;width:100%;max-width:100%}.map-square{height:400px}.meta-row{margin-left:0}.gpsBox{margin-left:0}}
 </style></head><body>
 <script>if(localStorage.getItem('trust_track')!=='yes'){location.replace('index.html');}</script>
 <div class='sticky-wrap'><div class='company-head'>Trust Logistics - UK</div>
 <header><div class='hdr'>
-<div class='header-top'>
-<div class='left-group'>
-<div class='logo'><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="18" fill="white"/><text x="50" y="62" text-anchor="middle" font-family="Inter, Arial Black, sans-serif" font-weight="900" font-size="38" fill="#0a2540">TL</text></svg></div>
-<div class='title-group'><h2>REF: Allan/DF/110</h2><div class='route-line'>Thornton UK → Morpeth Northumberland</div></div>
-</div>
-<a href='index.html' class='logout-btn' onclick='localStorage.clear();'>Logout ↪</a>
-</div>
+<div class='header-top'><div class='left-group'><div class='logo'><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="18" fill="white"/><text x="50" y="62" text-anchor="middle" font-family="Inter, Arial Black, sans-serif" font-weight="900" font-size="38" fill="#0a2540">TL</text></svg></div><div class='title-group'><h2>REF: Allan/DF/110</h2><div class='route-line'>Thornton UK → Morpeth Northumberland</div></div></div><a href='index.html' class='logout-btn' onclick='localStorage.clear();'>Logout ↪</a></div>
 <div class='meta-row'><span class='uk-badge' id='ukClock'>--</span><span class='uk-badge' id='speedBadge'>-- km/h</span></div>
 <div class='gpsBox'><div class='gpsTitle'>LIVE GPS Package tracking.</div><div class='gpsStatus' id='gpsStatus'>STATUS: In Transit • Thornton Village</div></div>
 </div></header></div>
@@ -73,4 +68,4 @@ function updateVirtualProgress(){const now=Date.now();const dt=(now-lastTick)/10
 (async()=>{await getRoute();await loadTrip();let elapsed=tripData.isPaused?(tripData.pausedAt-tripData.startTime-tripData.accumulatedPause):(Date.now()-tripData.startTime-tripData.accumulatedPause);virtualProgress=Math.min(Math.max(elapsed/tripData.durationMs,0),0.998);
 function tick(){updateVirtualProgress();const p=virtualProgress;const pos=interp(route,p);const total=route.length;const cut=Math.floor(p*(total-1));const traveled=route.slice(0,cut+1);traveled.push(pos);const remaining=[pos].concat(route.slice(cut+1));if(traveledLine)traveledLine.setLatLngs(traveled);if(remainingLine)remainingLine.setLatLngs(remaining);if(remainingOuter)remainingOuter.setLatLngs(remaining);if(!marker)marker=L.marker(pos,{icon:truckIcon}).addTo(map);else marker.setLatLng(pos);document.getElementById('pos').innerText=`Truck: [${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}]`;document.getElementById('progress').innerText=`${(p*100).toFixed(1)}%`;document.getElementById('roadInfo').innerText=getRoadLabel(p);const speedKmh=Math.round(getSpeedMultiplier(p)*32);document.getElementById('speedBadge').innerText=`${speedKmh} km/h`;const remainingMs=(1-p)*tripData.durationMs/Math.max(getSpeedMultiplier(p),0.35);const etaDate=new Date(Date.now()+remainingMs);document.getElementById('eta').innerText=`ETA: ${formatUK(etaDate)}`;document.getElementById('status').innerText=tripData.isPaused?`Paused ${(p*100).toFixed(1)}%`:`Live ${(p*100).toFixed(1)}%`;document.getElementById('gpsStatus').innerText=tripData.isPaused?'STATUS: Paused':`STATUS: In Transit • ${getRoadLabel(p).replace('Road: ','')}`;}
 tick();setInterval(tick,1500);})();
-</script></body></html> 
+</script></body></html>
