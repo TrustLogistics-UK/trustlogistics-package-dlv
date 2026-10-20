@@ -1,1 +1,29 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TrustLogistics - Login</title><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}body{background:#f1f5f9;min-height:100vh}header{position:relative;padding:26px 18px;color:#fff;overflow:hidden}header::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,50,0.94),rgba(7,25,50,0.75)),url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1600&auto=format&fit=crop');background-size:cover;background-position:center;z-index:0}.hdr{position:relative;z-index:1;max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}.brand{display:flex;gap:12px;align-items:center}.logo{width:46px;height:46px;background:#fff;color:#0a2540;border-radius:12px;display:grid;place-items:center;font-size:24px}.wrap{max-width:1100px;margin:24px auto;padding:0 14px;display:grid;place-items:center}.card{background:#fff;padding:26px;border-radius:18px;width:100%;max-width:460px;box-shadow:0 10px 30px rgba(0,0,0,.12);border:1px solid #e2e8f0}.label{font-size:11px;font-weight:800;color:#334155;margin:12px 0 6px;display:block;letter-spacing:.5px}.pkg{display:flex;gap:8px}.pkgBtn{flex:1;padding:10px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;cursor:pointer;font-weight:800;font-size:11px}.pkgBtn.active{background:#0a2540;color:#fff;border-color:#0a2540}input{width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:14px}input:focus{outline:none;border-color:#0066ff;box-shadow:0 0 0 3px rgba(0,102,255,.15)}.loginBtn{width:100%;padding:13px;border-radius:12px;border:none;background:#0066ff;color:#fff;font-weight:800;font-size:14px;cursor:pointer;margin-top:16px}.err{background:#fef2f2;color:#991b1b;padding:10px;border-radius:10px;font-size:12px;border:1px solid #fecaca;display:none;margin-bottom:10px}.hint{font-size:10px;color:#94a3b8;text-align:center;margin-top:14px;line-height:1.5}</style></head><body><header><div class="hdr"><div class="brand"><div class="logo">🚚</div><div><h2>TrustLogistics</h2><small>Live GPS • Secure Delivery</small></div></div><div style="font-size:11px;opacity:.9">UK Logistics Network</div></div></header><div class="wrap"><div class="card"><h3 style="color:#0a2540;text-align:center">Track Your Package</h3><p style="text-align:center;color:#64748b;font-size:12px;margin:6px 0 14px">Enter your AWB and VIN to view live location</p><div id="err" class="err"></div><label class="label">PACKAGE TYPE</label><div class="pkg"><button class="pkgBtn active" id="btnVehicle" onclick="setPkg('VEHICLE')">📦 VEHICLE</button><button class="pkgBtn" id="btnDoc" onclick="setPkg('DOC')">📄 DOCUMENT</button></div><label class="label">AWB / REFERENCE</label><input id="awb" placeholder="Allan/DF/110"><label class="label">VIN / IMEI CODE</label><input id="vin" placeholder="H43245/IMEI/1001" type="text"><button class="loginBtn" onclick="doLogin()">Login → View Tracking</button><div class="hint">Demo Logins:<br><b>Admin:</b> Admin / Admin → Admin Panel<br><b>Allan:</b> Allan/DF/110 / H43245/IMEI/1001 → Thornton → Morpeth Live Map</div></div></div>
+<script>
+let pkg='VEHICLE';
+function setPkg(p){pkg=p; document.getElementById('btnVehicle').classList.toggle('active',p==='VEHICLE'); document.getElementById('btnDoc').classList.toggle('active',p==='DOC');}
+function showErr(m){const e=document.getElementById('err'); e.innerText=m; e.style.display='block';}
+function doLogin(){
+ const awb=document.getElementById('awb').value.trim();
+ const vin=document.getElementById('vin').value.trim();
+ if(!awb||!vin){showErr('Please fill AWB and VIN'); return;}
 
+ if(awb==='Admin' && vin==='Admin'){
+   localStorage.setItem('trust_user','Admin');
+   localStorage.setItem('trust_track','yes');
+   location.href='admin.html'; return;
+ }
+
+ if(awb==='Allan/DF/110' && (vin==='H43245/IMEI/1001' || vin==='H432456/IMEI/110')){
+   if(pkg!=='VEHICLE'){showErr('Select VEHICLE for Allan/DF/110'); return;}
+   localStorage.setItem('trust_track','yes');
+   localStorage.setItem('trust_awb','Allan/DF/110');
+   localStorage.setItem('trust_vin',vin);
+   localStorage.setItem('trust_user','Allan');
+   if(!localStorage.getItem('tl_shared_start_thornton')) localStorage.setItem('tl_shared_start_thornton', Date.now());
+   location.href='tracking.html'; return;
+ }
+
+ showErr('Invalid credentials. Use Allan/DF/110 / H43245/IMEI/1001');
+}
+</script></body></html>
