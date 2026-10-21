@@ -1,1 +1,44 @@
 
+<!DOCTYPE html><html><head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Admin - Allan/DF/110</title>
+<script src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js'></script>
+<script src='https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js'></script>
+<style>
+*{box-sizing:border-box;font-family:Inter,Arial}body{background:#0a2540;color:#fff;padding:16px}
+.card{background:#fff;color:#0a2540;border-radius:16px;padding:16px;margin-bottom:14px}
+button{border:0;padding:12px 16px;border-radius:10px;font-weight:800;cursor:pointer;margin:4px}
+.p{background:#dc2626;color:#fff}.r{background:#16a34a;color:#fff}
+.y{background:#f59e0b}.b{background:#2563eb;color:#fff}.g{background:#f1f5f9;border:1px solid #e2e8f0}
+</style></head><body>
+<h3>ADMIN CONTROL - Allan/DF/110</h3>
+<p style="font-size:11px;color:#94a3b8;margin-bottom:12px">Doc: ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH - Controls tracking.html live map</p>
+
+<div class="card">
+<b style="font-size:12px">PACKAGE MOVEMENT ON MAP (OSRM Route)</b><br><br>
+<button class="p" onclick="pause()">⏸ Pause - Stop on map</button>
+<button class="r" onclick="resume()">▶ Resume</button>
+<button class="y" onclick="move(-0.10)">⏪ Rewind -10% Back</button>
+<button class="b" onclick="move(0.10)">⏩ Forward +10% Forward</button><br>
+<button class="g" onclick="speed(1)">Normal Speed</button>
+<button class="b" onclick="speed(2.5)">Fast 2.5x</button>
+<button class="g" onclick="restart()">🔄 Restart to Stockton</button>
+<div id="s" style="margin-top:12px;background:#f8fafc;padding:10px;border-radius:8px;font-size:12px;border:1px solid #e2e8f0">Connecting...</div>
+</div>
+
+<script>
+firebase.initializeApp({projectId:"trustlogistics-package-dlv"});
+const docRef=firebase.firestore().collection("packages").doc("ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH");
+let t={};
+docRef.onSnapshot(s=>{
+ if(!s.exists()){docRef.set({startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1});return;}
+ t=s.data();
+ let p=t.manualProgress!=null?t.manualProgress:(()=>{let e=t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause);e*=(t.speedFactor||1);return Math.min(Math.max(e/t.durationMs,0),0.998)})();
+ document.getElementById('s').innerHTML=(t.isPaused?'PAUSED':'LIVE')+' | '+(p*100).toFixed(1)+'% | Speed '+t.speedFactor+'x';
+});
+function pause(){if(!t.isPaused)docRef.update({isPaused:true,pausedAt:Date.now()});}
+function resume(){if(t.isPaused){docRef.update({isPaused:false,accumulatedPause:(t.accumulatedPause||0)+(Date.now()-(t.pausedAt||Date.now())),pausedAt:0});}}
+function move(d){let p=t.manualProgress!=null?t.manualProgress:(()=>{let e=t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause);e*=(t.speedFactor||1);return e/t.durationMs})();let np=Math.min(Math.max(p+d,0),0.98);docRef.update({manualProgress:np});setTimeout(()=>{docRef.update({manualProgress:firebase.firestore.FieldValue.delete()});},3500);}
+function speed(f){docRef.update({speedFactor:f});}
+function restart(){if(confirm('Restart to Stockton?'))docRef.set({startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1});}
+</script></body></html>
