@@ -1,39 +1,68 @@
-
 <!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Trust Logistics - UK</title><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}html,body{width:100%;overflow-x:hidden}body{background:#f1f5f9}
-.sticky-wrap{position:sticky;top:0;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,0.25)}
-.company-head{width:100%;text-align:center;background:#fff;color:#0a2540;font-weight:900;font-size:14px;padding:9px 12px;border-bottom:1px solid #e2e8f0}
-header{position:relative;width:100%;padding:12px 14px 10px;color:#fff;overflow:hidden;background:#0a2540}
-header::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,50,0.97) 0%,rgba(7,25,50,0.80) 100%),url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1600&auto=format&fit=crop');background-size:cover;background-position:center;z-index:0}
-.hdr{position:relative;z-index:2;max-width:1300px;margin:0 auto;}
-.header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.left-group{display:flex;align-items:flex-start;gap:11px}
-.logo{width:52px;height:52px;background:#fff;border-radius:13px;display:grid;place-items:center;overflow:hidden;padding:0;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
-.logo svg{width:100%;height:100%}
-.title-group{padding-top:1px}
-.title-group h2{font-size:19px;font-weight:900;line-height:1.1;color:#fff}
-.route-line{font-size:12.5px;font-weight:500;color:#cbd5e1;margin-top:3px}
-.logout-btn{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.35);padding:7px 14px;border-radius:20px;font-size:11px;font-weight:800;text-decoration:none;white-space:nowrap;flex-shrink:0;margin-top:2px}
-.meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-left:63px}
-.uk-badge{font-size:11px;font-weight:700;background:#eef2ff;padding:6px 12px;border-radius:20px;border:1px solid #dbe2ff;color:#0a2540;white-space:nowrap}
-.gpsBox{background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.25);padding:8px 14px;border-radius:13px;margin-top:9px;margin-left:63px;max-width:520px}
-.gpsTitle{font-size:12.5px;font-weight:800;color:#fff}
-.gpsStatus{font-size:11px;font-weight:700;margin-top:3px;color:#e2e8f0}
-.main{max-width:1300px;margin:14px auto;padding:0 12px;display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
-.left-col{flex:1 1 620px;display:flex;flex-direction:column;gap:14px;min-width:280px;width:100%}
-.map-card{background:#fff;padding:9px;border-radius:20px;border:2px solid #0a2540;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:100%}
-.map-square{width:100%;height:480px;border-radius:12px;overflow:hidden}#map{width:100%;height:100%}
-.info{background:#fff;border-radius:18px;padding:16px;border:1px solid #e2e8f0;width:100%;display:block}
-.info h4{font-size:15px;font-weight:800;color:#0a2540;line-height:1.4;white-space:normal;word-wrap:break-word;margin-bottom:10px}
-.row{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;margin:8px 0;width:100%;align-items:center}
-.badge{display:inline-flex;align-items:center;background:#eef2ff;padding:8px 12px;border-radius:20px;font-size:12px;border:1px solid #dbe2ff;color:#0a2540;font-weight:600;white-space:nowrap;max-width:100%;word-break:break-all}
-.badge.dark{background:#0a2540;color:#fff;border-color:#0a2540}
-.right-col{flex:0 1 360px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px}
-.vehicle-img-card{background:#fff;padding:8px;border-radius:20px;border:1px solid #e2e8f0;overflow:hidden;width:100%}
-.vehicle-img{width:100%;height:230px;object-fit:cover;border-radius:12px;display:block}
-.vbox{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;width:100%}
-.vbox b{display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
-.vbox span{font-size:13px;font-weight:700;color:#0a2540}
-.route-box{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;width:100%;border-left:4px solid #0a2540}
-.route-title{font-size:12px;font-weight:900;color:#0a2540;letter-spacing:.8px;margin-bottom:10px}
-.route-item{display:flex;align-items:center;gap
+body{margin:0;font-family:Inter,Arial,sans-serif;background:#f1f5f9}
+.top{background:#fff;text-align:center;padding:9px;font-weight:900;color:#0a2540;border-bottom:1px solid #e2e8f0}
+.header{background:#0a2540;color:#fff;padding:14px}
+.hdr{max-width:1200px;margin:0 auto}
+.badge{background:#eef2ff;color:#0a2540;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;margin:3px}
+.main{max-width:1200px;margin:12px auto;padding:0 12px;display:flex;gap:14px;flex-wrap:wrap}
+.left{flex:1 1 600px}.right{flex:0 1 350px;width:100%}
+.map-card{background:#fff;padding:8px;border-radius:18px;border:2px solid #0a2540}
+#map{width:100%;height:480px;border-radius:12px}
+.box{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin-bottom:10px}
+.route-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px}
+.dot-done{background:#0a2540;color:#fff}.dot-prog{background:#f59e0b;color:#000}.dot-pend{background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0}
+.stat{margin-left:auto;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px}
+.s-done{background:#dcfce7;color:#166534}.s-prog{background:#fef3c7;color:#92400e}.s-pend{background:#f1f5f9;color:#94a3b8}
+@media(max-width:900px){.main{flex-direction:column}.right{max-width:100%}}
+</style></head><body>
+<div class="top">Trust Logistics - UK</div>
+<div class="header"><div class="hdr"><div style="font-size:18px;font-weight:900">REF: Allan/DF/110</div><div style="font-size:12px;color:#cbd5e1;margin-top:2px">Stockton (Thornaby) TS17 6QR → 8 Wansbeck Street, Morpeth NE61 1XZ</div><div style="margin-top:8px"><span class="badge" id="clock">--</span><span class="badge" id="speed">32 km/h</span><span class="badge" id="status">Live</span></div></div></div>
+<div class="main"><div class="left"><div class="map-card"><div id="map"></div></div>
+<div class="box"><div style="font-weight:900;font-size:12px;margin-bottom:8px">ROUTE PROGRESS</div>
+<div class="route-item"><div class="dot dot-pend" id="d1">O</div>Stockton (Thornaby) TS17 6QR - Start<div class="stat s-pend" id="s1">Pending</div></div>
+<div class="route-item"><div class="dot dot-pend" id="d2">O</div>A19 / A1 Clear Road<div class="stat s-pend" id="s2">Pending</div></div>
+<div class="route-item"><div class="dot dot-pend" id="d3">O</div>Moor Lane<div class="stat s-pend" id="s3">Pending</div></div>
+<div class="route-item"><div class="dot dot-pend" id="d4">O</div>8 Wansbeck Street, Morpeth NE61 1XZ - Destination<div class="stat s-pend" id="s4">Pending</div></div>
+</div>
+<div class="box"><div><span class="badge" id="origin">Origin: Stockton [54.5611,-1.3038]</span><span class="badge" id="dest">Dest: 8 Wansbeck St [55.16792,-1.68842]</span></div><div style="margin-top:6px"><span class="badge" id="pos">Truck: -</span><span class="badge" id="road">Road: Thornaby</span><span class="badge" id="eta">ETA: -</span></div></div>
+</div><div class="right"><div class="box"><b>Vehicle</b><br>Range Rover - Heavy Load - 76 plates</div><div class="box"><b>Carrier</b><br>Heavy Duty Truck</div></div></div>
+<script>
+setInterval(function(){var el=document.getElementById('clock');if(el){var now=new Date();el.innerText=now.toLocaleString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' UK';}},1000);
+var STOCKTON=[54.561109,-1.303778],MORPETH=[55.16792,-1.68842];
+var map=L.map('map').setView([54.86,-1.5],9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+var route=[STOCKTON,MORPETH];
+var truckIcon=L.divIcon({html:'<div style="font-size:20px;background:#0a2540;color:#fff;padding:4px 6px;border-radius:8px">TRUCK</div>',className:'',iconSize:[60,30],iconAnchor:[30,15]});
+var marker=null,outer=null,inner=null,travel=null;
+function drawBase(){if(outer)map.removeLayer(outer);if(inner)map.removeLayer(inner);if(travel)map.removeLayer(travel);outer=L.polyline(route,{color:'#fff',weight:8}).addTo(map);inner=L.polyline(route,{color:'#4285F4',weight:5}).addTo(map);travel=L.polyline([],{color:'#94a3b8',weight:4,dashArray:'8,10'}).addTo(map);map.fitBounds(outer.getBounds(),{padding:[20,20]});}
+function interp(rt,t){var tot=rt.length-1,idx=t*tot,i=Math.floor(idx),f=idx-i;if(i>=tot)return rt[tot];var a=rt[i],b=rt[i+1];return[a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f];}
+function roadLabel(p){if(p<0.12)return 'Road: Stockton (Thornaby)';if(p>=0.45&&p<=0.60)return 'Road: Moor Lane';if(p>=0.82)return 'Road: 8 Wansbeck Street';return 'Road: A19 / A1';}
+function updateBox(p){
+var segs=[{end:0.12,d:'d1',s:'s1'},{end:0.45,d:'d2',s:'s2'},{end:0.60,d:'d3',s:'s3'},{end:1.0,d:'d4',s:'s4'}];
+var cur=0;for(var i=0;i<segs.length;i++){if(p<segs[i].end){cur=i;break;} if(i==segs.length-1)cur=3;}
+for(var j=0;j<segs.length;j++){var d=document.getElementById(segs[j].d), st=document.getElementById(segs[j].s); if(!d||!st)continue; if(j<cur){d.className='dot dot-done';d.innerText='V';st.className='stat s-done';st.innerText='Done';} else if(j==cur){d.className='dot dot-prog';d.innerText='>';st.className='stat s-prog';st.innerText='In Progress';} else {d.className='dot dot-pend';d.innerText='O';st.className='stat s-pend';st.innerText='Pending';}}
+}
+var start=Date.now(),duration=4*60*60*1000;
+function getProgress(){var elapsed=Date.now()-start;var p=elapsed/duration;if(p>0.998)p=0.998;if(p<0)p=0;return p;}
+async function loadRoute(){try{var r=await fetch('https://router.project-osrm.org/route/v1/driving/'+STOCKTON[1]+','+STOCKTON[0]+';'+MORPETH[1]+','+MORPETH[0]+'?overview=full&geometries=geojson');var j=await r.json();if(j.routes&&j.routes[0]){route=j.routes[0].geometry.coordinates.map(function(c){return[c[1],c[0]]});}}catch(e){}drawBase();}
+loadRoute();
+function tick(){
+var p=getProgress();
+var pos=interp(route,p);
+var total=route.length,cut=Math.floor(p*(total-1));
+var trav=route.slice(0,cut+1);trav.push(pos);
+var rem=[pos].concat(route.slice(cut+1));
+if(travel)travel.setLatLngs(trav);
+if(inner)inner.setLatLngs(rem);
+if(outer)outer.setLatLngs(rem);
+if(!marker)marker=L.marker(pos,{icon:truckIcon}).addTo(map);else marker.setLatLng(pos);
+document.getElementById('pos').innerText='Truck: ['+pos[0].toFixed(4)+', '+pos[1].toFixed(4)+']';
+document.getElementById('road').innerText=roadLabel(p);
+document.getElementById('status').innerText='Live '+(p*100).toFixed(1)+'%';
+document.getElementById('eta').innerText='ETA: '+new Date(Date.now()+(1-p)*duration).toLocaleString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'})+' UK';
+updateBox(p);
+}
+setInterval(tick,1500);
+tick();
+</script></body></html>
