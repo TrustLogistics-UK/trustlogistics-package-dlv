@@ -1,1 +1,140 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live Tracking - TRUST-LO-176364</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+body{margin:0;font-family:system-ui;background:#f5f7fb}
+.header{background:#111827;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.badge{background:#1f2937;padding:6px 10px;border-radius:20px;font-size:12px}
+.badge.live{background:#10b981;color:#000;font-weight:700}
+.badge.road{background:#374151}
+.map{height:52vh}
+.card{background:#fff;margin:12px;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.route-box{background:#fff;margin:0 12px 12px;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);border-left:4px solid #10b981}
+.route-title{font-weight:700;font-size:13px;margin-bottom:10px;color:#111827;letter-spacing:.5px}
+.route-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.route-item:last-child{border:0}
+.route-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.dot-done{background:#10b981;color:#fff}
+.dot-progress{background:#f59e0b;color:#fff;animation:pulse 1.2s infinite}
+.dot-pending{background:#e5e7eb;color:#9ca3af}
+.route-label{flex:1}
+.route-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.status-done{background:#d1fae5;color:#065f46}
+.status-progress{background:#fef3c7;color:#92400e}
+.status-pending{background:#f3f4f6;color:#9ca3af}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><b>TRUST-LO-176364</b> • Trust Logistics UK</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="badge live" id="liveBadge">Live 0%</span>
+    <span class="badge" id="eta">ETA --:--</span>
+    <span class="badge" id="speed">32 km/h</span>
+    <span class="badge road" id="road">Road: Thornton Village</span>
+  </div>
+</div>
+<div id="map" class="map"></div>
+
+<!-- NEW: Route Transitions Box - ONLY addition -->
+<div class="route-box" id="routeTransitions">
+  <div class="route-title">ROUTE PROGRESS</div>
+  <div class="route-item" id="r-thornton">
+    <div class="route-dot dot-pending" id="d-thornton">○</div>
+    <div class="route-label">Thornton Village</div>
+    <div class="route-status status-pending" id="s-thornton">Pending</div>
+  </div>
+  <div class="route-item" id="r-clear">
+    <div class="route-dot dot-pending" id="d-clear">○</div>
+    <div class="route-label">Clear Road</div>
+    <div class="route-status status-pending" id="s-clear">Pending</div>
+  </div>
+  <div class="route-item" id="r-moor">
+    <div class="route-dot dot-pending" id="d-moor">○</div>
+    <div class="route-label">Moor Lane</div>
+    <div class="route-status status-pending" id="s-moor">Pending</div>
+  </div>
+  <div class="route-item" id="r-morpeth">
+    <div class="route-dot dot-pending" id="d-morpeth">○</div>
+    <div class="route-label">Morpeth Town Centre</div>
+    <div class="route-status status-pending" id="s-morpeth">Pending</div>
+  </div>
+</div>
+
+<div class="card">
+  <div>Progress: <span id="progressText">0%</span> • Distance: <span id="dist">0 km</span></div>
+  <div style="background:#e5e7eb;height:8px;border-radius:4px;margin-top:8px"><div id="bar" style="height:8px;background:#10b981;width:0%;border-radius:4px"></div></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const tripData={"orderId":"TRUST-LO-176364","start":{"name":"Thornton, UK","coords":[55.174,-1.8476]},"end":{"name":"Morpeth, Northumberland","coords":[55.1674,-1.6911]},"startTime":Date.now(),"durationMs":4*60*60*1000,"path":[[55.174,-1.8476],[55.173,-1.82],[55.171,-1.79],[55.169,-1.75],[55.1674,-1.6911]]};
+
+let map=L.map('map').setView(tripData.start.coords,12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let poly=L.polyline(tripData.path,{color:'#10b981',weight:4}).addTo(map);
+let marker=L.marker(tripData.start.coords).addTo(map);
+map.fitBounds(poly.getBounds());
+
+function getSpeedMultiplier(p){
+  let m=1;
+  if(p<0.12) m=0.35+p*2;
+  else if(p>=0.45 && p<=0.60) m=0.45+Math.sin((p-0.45)/0.15*Math.PI)*0.15;
+  else if(p>=0.82) m=0.4+(1-p)*1.5;
+  else m=1;
+  return Math.max(0.35,Math.min(1,m));
+}
+function getRoadInfo(p){
+  if(p<0.12) return "Thornton Village";
+  if(p<0.45) return "Clear Road";
+  if(p<0.60) return "Moor Lane";
+  if(p<0.82) return "Clear Road";
+  return "Morpeth Town Centre";
+}
+function updateRouteBox(p){
+  const segs=[
+    {pEnd:0.12,dot:'d-thornton',stat:'s-thornton',label:'Thornton Village'},
+    {pEnd:0.45,dot:'d-clear',stat:'s-clear',label:'Clear Road'},
+    {pEnd:0.60,dot:'d-moor',stat:'s-moor',label:'Moor Lane'},
+    {pEnd:1.00,dot:'d-morpeth',stat:'s-morpeth',label:'Morpeth Town Centre'}
+  ];
+  let curIdx=segs.findIndex(s=>p < s.pEnd);
+  if(curIdx===-1) curIdx=segs.length-1;
+  segs.forEach((s,i)=>{
+    const d=document.getElementById(s.dot), st=document.getElementById(s.stat);
+    if(i < curIdx){ d.className='route-dot dot-done'; d.textContent='✓'; st.className='route-status status-done'; st.textContent='Done'; }
+    else if(i===curIdx){ d.className='route-dot dot-progress'; d.textContent='→'; st.className='route-status status-progress'; st.textContent='In Progress'; }
+    else { d.className='route-dot dot-pending'; d.textContent='○'; st.className='route-status status-pending'; st.textContent='Pending'; }
+  });
+}
+function lerp(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}
+function getPos(p){
+  const path=tripData.path; const segF=p*(path.length-1); const idx=Math.floor(segF); const t=segF-idx;
+  if(idx>=path.length-1) return path[path.length-1]; return lerp(path[idx],path[idx+1],t);
+}
+function tick(){
+  const elapsed=Date.now()-tripData.startTime; let p=elapsed/tripData.durationMs; if(p>1) p=1;
+  const pos=getPos(p); marker.setLatLng(pos);
+  const pct=Math.round(p*100);
+  document.getElementById('liveBadge').textContent='Live '+pct+'%';
+  document.getElementById('progressText').textContent=pct+'%';
+  document.getElementById('bar').style.width=pct+'%';
+  const mult=getSpeedMultiplier(p); const speed=Math.round(mult*32);
+  document.getElementById('speed').textContent=speed+' km/h';
+  document.getElementById('road').textContent='Road: '+getRoadInfo(p);
+  const remainMs=(1-p)*tripData.durationMs; const eta=new Date(Date.now()+remainMs);
+  document.getElementById('eta').textContent='ETA '+eta.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('dist').textContent=(9.966*p).toFixed(1)+' / 9.97 km';
+  updateRouteBox(p);
+  if(p<1) requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>
