@@ -1,3 +1,4 @@
+
 <!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Trust Logistics - UK</title><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}html,body{width:100%;overflow-x:hidden}body{background:#f1f5f9}
 .sticky-wrap{position:sticky;top:0;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,0.25)}
@@ -33,20 +34,6 @@ header::before{content:'';position:absolute;inset:0;background:linear-gradient(9
 .vbox{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;width:100%}
 .vbox b{display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
 .vbox span{font-size:13px;font-weight:700;color:#0a2540}
-/* ONLY NEW CSS - Route Box */
-.route-box{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;width:100%;border-left:4px solid #0a2540}
-.route-title{font-size:12px;font-weight:900;color:#0a2540;letter-spacing:.8px;margin-bottom:10px}
-.route-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#0a2540}
-.route-item:last-child{border:0}
-.route-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
-.dot-done{background:#0a2540;color:#fff}
-.dot-progress{background:#f59e0b;color:#000;animation:rpulse 1.2s infinite}
-.dot-pending{background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0}
-.route-status{margin-left:auto;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px}
-.s-done{background:#dcfce7;color:#166534}
-.s-prog{background:#fef3c7;color:#92400e}
-.s-pend{background:#f1f5f9;color:#94a3b8}
-@keyframes rpulse{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
 @media(max-width:900px){.main{flex-direction:column}.left-col{flex:1 1 100%;width:100%}.right-col{flex:1 1 100%;width:100%;max-width:100%}.map-square{height:400px}.meta-row{margin-left:0}.gpsBox{margin-left:0}}
 </style></head><body>
 <script>if(localStorage.getItem('trust_track')!=='yes'){location.replace('index.html');}</script>
@@ -57,16 +44,8 @@ header::before{content:'';position:absolute;inset:0;background:linear-gradient(9
 <div class='gpsBox'><div class='gpsTitle'>LIVE GPS Package tracking.</div><div class='gpsStatus' id='gpsStatus'>STATUS: In Transit • Thornton Village</div></div>
 </div></header></div>
 <div class='main'><div class='left-col'><div class='map-card'><div class='map-square'><div id='map'></div></div></div>
-<!-- ONLY NEW HTML - Route Progress -->
-<div class='route-box'>
-<div class='route-title'>ROUTE PROGRESS</div>
-<div class='route-item'><div class='route-dot dot-pending' id='rdot-thornton'>○</div><div>Thornton Village</div><div class='route-status s-pend' id='rstat-thornton'>Pending</div></div>
-<div class='route-item'><div class='route-dot dot-pending' id='rdot-clear'>○</div><div>Clear Road</div><div class='route-status s-pend' id='rstat-clear'>Pending</div></div>
-<div class='route-item'><div class='route-dot dot-pending' id='rdot-moor'>○</div><div>Moor Lane</div><div class='route-status s-pend' id='rstat-moor'>Pending</div></div>
-<div class='route-item'><div class='route-dot dot-pending' id='rdot-morpeth'>○</div><div>Morpeth Town Centre</div><div class='route-status s-pend' id='rstat-morpeth'>Pending</div></div>
-</div>
-<div class='info'><h4>Shipment Allan/DF/110 • Range Rover on Truck</h4><div class='row'><span class='badge dark' id='status'>Live 0%</span><span class='badge' id='progress'>0%</span><span class='badge' id='eta'>ETA: -</span></div><div class='row'><span class='badge' id='origin'>Origin: Thornton [55.174,-1.8476]</span><span class='badge' id='dest'>Dest: Morpeth [55.1674,-1.6911]</span></div><div class='row'><span class='badge' id='pos'>Truck: -</span><span class='badge' id='roadInfo'>Road: Clear</span></div></div></div>
-<div class='right-col'><div class='vehicle-img-card'><img class='vehicle-img' src='defender.jpg' alt='Land Rover' onerror="this.src='./defender.jpg'"/></div><div class='vbox'><b>Vehicle on Truck</b><span>Range Rover • Heavy Load</span></div><div class='vbox'><b>Carrier</b><span>Heavy Duty Truck • Low Speed</span></div><div class='vbox'><b>Plates Record</b><span>76 plates recorded for sales</span></div></div></div>
+<div class='info'><h4>Shipment Allan/DF/110 • Range Rover on Truck</h4><div class='row'><span class='badge dark' id='status'>Live 0%</span><span class='badge' id='eta'>ETA: -</span></div><div class='row'><span class='badge' id='origin'>Origin: Thornton [55.174,-1.8476]</span><span class='badge' id='dest'>Dest: Morpeth [55.1674,-1.6911]</span></div><div class='row'><span class='badge' id='pos'>Truck: -</span><span class='badge' id='roadInfo'>Road: Clear</span></div></div></div>
+<div class='right-col'><div class='vehicle-img-card'><img class='vehicle-img' src='defender.jpg' alt='Land Rover'/></div><div class='vbox'><b>Vehicle on Truck</b><span>Range Rover • Heavy Load</span></div><div class='vbox'><b>Carrier</b><span>Heavy Duty Truck • Low Speed</span></div><div class='vbox'><b>Plates Record</b><span>76 plates recorded for sales</span></div></div></div>
 <script type='module'>
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';import{getFirestore,doc,getDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 let db=null;try{db=getFirestore(initializeApp({projectId:'trustlogistics-package-dlv'}));}catch(e){}
@@ -84,25 +63,10 @@ let tripData={startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,paused
 function smoothstep(e0,e1,x){x=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return x*x*(3-2*x);}
 function getSpeedMultiplier(p){let m=1.0;if(p<0.12){let f=smoothstep(0,0.12,p);m=0.35+0.65*f;}else if(p>=0.45&&p<=0.60){let c=0.53;let d=Math.abs(p-c)/0.075;let s=1-smoothstep(0,1,d);m=1.0-s*0.55;}else if(p>=0.82){let f=smoothstep(0.82,1.0,p);m=1.0-f*0.60;}return m;}
 function getRoadLabel(p){if(p<0.12)return 'Road: Thornton Village';if(p>=0.45&&p<=0.60)return 'Road: Moor Lane';if(p>=0.82)return 'Road: Morpeth Town Centre';return 'Road: Clear';}
-// ONLY NEW JS FUNCTION
-function updateRouteBox(p){
-  const segs=[
-    {end:0.12, dot:'rdot-thornton', stat:'rstat-thornton'},
-    {end:0.45, dot:'rdot-clear', stat:'rstat-clear'},
-    {end:0.60, dot:'rdot-moor', stat:'rstat-moor'},
-    {end:1.00, dot:'rdot-morpeth', stat:'rstat-morpeth'}
-  ];
-  let cur=segs.findIndex(s=>p < s.end); if(cur===-1) cur=3;
-  segs.forEach((s,i)=>{
-    const d=document.getElementById(s.dot), st=document.getElementById(s.stat);
-    if(!d||!st) return;
-    if(i < cur){ d.className='route-dot dot-done'; d.textContent='✓'; st.className='route-status s-done'; st.textContent='Done'; }
-    else if(i===cur){ d.className='route-dot dot-progress'; d.textContent='→'; st.className='route-status s-prog'; st.textContent='In Progress'; }
-    else { d.className='route-dot dot-pending'; d.textContent='○'; st.className='route-status s-pend'; st.textContent='Pending'; }
-  });
-}
 async function loadTrip(){let s=localStorage.getItem('tl_shared_start_thornton');if(!s){s=Date.now();localStorage.setItem('tl_shared_start_thornton',s);}tripData.startTime=parseInt(s);tripData.isPaused=localStorage.getItem('tl_isPaused')==='true';tripData.pausedAt=parseInt(localStorage.getItem('tl_pausedAt')||'0');tripData.accumulatedPause=parseInt(localStorage.getItem('tl_accPause')||'0');if(db){try{const ref=doc(db,'packages','ALLAN_DF_110_SHARED_TRIP_THORNTON_MORPETH');const snap=await getDoc(ref);if(snap.exists()){const d=snap.data();if(d.startTime)tripData.startTime=d.startTime;if(d.isPaused!==undefined)tripData.isPaused=d.isPaused;if(d.pausedAt)tripData.pausedAt=d.pausedAt;if(d.accumulatedPause)tripData.accumulatedPause=d.accumulatedPause;}}catch(e){}}}
 let lastTick=Date.now(),virtualProgress=0;
 function updateVirtualProgress(){const now=Date.now();const dt=(now-lastTick)/1000;lastTick=now;if(tripData.isPaused)return;const baseSpeed=1/tripData.durationMs*1000;const mult=getSpeedMultiplier(virtualProgress);virtualProgress+=baseSpeed*dt*mult;if(virtualProgress>0.998)virtualProgress=0.998;}
 (async()=>{await getRoute();await loadTrip();let elapsed=tripData.isPaused?(tripData.pausedAt-tripData.startTime-tripData.accumulatedPause):(Date.now()-tripData.startTime-tripData.accumulatedPause);virtualProgress=Math.min(Math.max(elapsed/tripData.durationMs,0),0.998);
-function tick(){updateVirtualProgress();const p=virtualProgress;const pos=interp(route,p);const total=route.length;const cut=Math.floor(p*(total-1));const traveled=route.slice(0,cut+1);traveled.push(pos);const remaining=[pos].concat(route.slice(cut+1));if(traveledLine)traveledLine.setLatLngs(traveled);if(remainingLine)remainingLine.setLatLngs(remaining);if(remainingOuter)remainingOuter.setLatLngs(remaining);if(!marker)marker=L
+function tick(){updateVirtualProgress();const p=virtualProgress;const pos=interp(route,p);const total=route.length;const cut=Math.floor(p*(total-1));const traveled=route.slice(0,cut+1);traveled.push(pos);const remaining=[pos].concat(route.slice(cut+1));if(traveledLine)traveledLine.setLatLngs(traveled);if(remainingLine)remainingLine.setLatLngs(remaining);if(remainingOuter)remainingOuter.setLatLngs(remaining);if(!marker)marker=L.marker(pos,{icon:truckIcon}).addTo(map);else marker.setLatLng(pos);document.getElementById('pos').innerText=`Truck: [${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}]`;document.getElementById('roadInfo').innerText=getRoadLabel(p);const speedKmh=Math.round(getSpeedMultiplier(p)*32);document.getElementById('speedBadge').innerText=`${speedKmh} km/h`;const remainingMs=(1-p)*tripData.durationMs/Math.max(getSpeedMultiplier(p),0.35);const etaDate=new Date(Date.now()+remainingMs);document.getElementById('eta').innerText=`ETA: ${formatUK(etaDate)}`;document.getElementById('status').innerText=`Live ${(p*100).toFixed(1)}%`;document.getElementById('gpsStatus').innerText=tripData.isPaused?'STATUS: Paused':`STATUS: In Transit • ${getRoadLabel(p).replace('Road: ','')}`;}
+tick();setInterval(tick,1500);})();
+</script></body></html>
