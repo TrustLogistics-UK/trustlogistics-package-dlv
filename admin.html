@@ -1,1 +1,83 @@
 
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - Trust Logistics</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><style>
+body{margin:0;font-family:Inter,Arial,sans-serif;background:#f1f5f9}
+.top{background:#fff;text-align:center;padding:12px;font-weight:900;color:#0a2540;border-bottom:1px solid #e2e8f0}
+.main{max-width:1200px;margin:12px auto;padding:0 12px;display:flex;gap:14px;flex-wrap:wrap}
+.left{flex:1 1 600px}.right{flex:0 1 360px;width:100%}
+.map-card{background:#fff;padding:8px;border-radius:18px;border:2px solid #0a2540}
+#map{width:100%;height:460px;border-radius:12px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.btn{border:0;padding:12px 14px;border-radius:12px;font-weight:800;font-size:12px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.pause{background:#ef4444}.play{background:#16a34a}.rewind{background:#f59e0b;color:#000}.ff{background:#0ea5e9}.restart{background:#0f172a}.speed{background:#7c3aed}.goto{background:#2563eb;grid-column:1/-1}
+.box{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-top:8px;font-size:13px}
+</style></head><body>
+<div class="top">ADMIN CONTROL - Stockton → 8 Wansbeck Street - Allan/DF/110</div>
+<div class="main"><div class="left"><div class="map-card"><div id="map"></div></div>
+<div class="controls">
+<button class="btn pause" id="bPause">⏸ Pause</button>
+<button class="btn play" id="bPlay">▶ Play</button>
+<button class="btn rewind" id="bRew">⏪ Rewind -10%</button>
+<button class="btn ff" id="bFF">⏩ Fast Forward +10%</button>
+<button class="btn speed" id="b2x">⚡ Speed 2x</button>
+<button class="btn speed" id="b1x" style="background:#64748b">🐢 Normal 1x</button>
+<button class="btn restart" id="bReset">🔄 Restart Journey</button>
+<a class="btn goto" href="tracking.html" onclick="localStorage.setItem('trust_track','yes')">Go to Allans Page →</a>
+<a class="btn goto" style="background:#64748b" href="index.html">← Back to Login</a>
+</div>
+<div class="box"><div>Progress: <b id="prog">0%</b> | Speed: <b id="speed">1x</b> | Paused: <b id="paused">false</b> | Distance: <b id="dist">0 km</b></div><div style="margin-top:6px;font-size:11px" id="fb">Firebase: Connecting...</div><div style="margin-top:6px;font-size:11px;color:#64748b">Rewind/FF moves package instantly on tracking page. Speed 2x makes it move faster. Pause freezes speed, ETA and state.</div></div>
+</div><div class="right"><div class="box"><b>REF</b> Allan/DF/110<br><b>Route</b> Stockton TS17 6QR [54.5611,-1.3038] → 8 Wansbeck St [55.16792,-1.68842]<br><b>Vehicle</b> Range Rover • 76 plates<br><b>Current Package</b> <span id="van">-</span></div></div></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {getFirestore, doc, setDoc, updateDoc, onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+let db=null; try{db=getFirestore(initializeApp({projectId:"trustlogistics-package-dlv"}));}catch(e){document.getElementById('fb').innerText='Firebase init failed';}
+const STOCKTON=[54.561109,-1.303778],MORPETH=[55.16792,-1.68842];
+const map=L.map('map').setView([54.86,-1.5],9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let route=[STOCKTON,MORPETH],outer=null,inner=null,marker=null;
+const icon=L.divIcon({html:'<div style="background:#0a2540;color:#fff;padding:4px 8px;border-radius:8px;font-weight:900;font-size:11px">VAN</div>',className:'',iconSize:[50,24]});
+async function getRoute(){try{const r=await fetch('https://router.project-osrm.org/route/v1/driving/'+STOCKTON[1]+','+STOCKTON[0]+';'+MORPETH[1]+','+MORPETH[0]+'?overview=full&geometries=geojson');const j=await r.json();if(j.routes&&j.routes[0])route=j.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);}catch(e){}if(outer)map.removeLayer(outer);if(inner)map.removeLayer(inner);outer=L.polyline(route,{color:'#fff',weight:7}).addTo(map);inner=L.polyline(route,{color:'#4285F4',weight:4}).addTo(map);map.fitBounds(outer.getBounds(),{padding:[20,20]});}
+function interp(rt,t){const tot=rt.length-1,idx=t*tot,i=Math.floor(idx),f=idx-i;if(i>=tot)return rt[tot];const a=rt[i],b=rt[i+1];return[a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f];}
+let trip={startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1,manualProgress:null};
+let prog=0;
+function recalc(){if(trip.manualProgress!==null){prog=trip.manualProgress;return;}let el=trip.isPaused?(trip.pausedAt-trip.startTime-trip.accumulatedPause):(Date.now()-trip.startTime-trip.accumulatedPause);el*=trip.speedFactor;prog=Math.min(Math.max(el/trip.durationMs,0),0.998);}
+const docRef=db?doc(db,"packages","ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH"):null;
+async function init(){
+await getRoute();
+if(!docRef){document.getElementById('fb').innerText='No DB - controls local only';return;}
+onSnapshot(docRef,(snap)=>{
+if(snap.exists()){
+const d=snap.data();
+trip.startTime=d.startTime||trip.startTime;
+trip.durationMs=d.durationMs||trip.durationMs;
+trip.isPaused=!!d.isPaused;
+trip.pausedAt=d.pausedAt||0;
+trip.accumulatedPause=d.accumulatedPause||0;
+trip.speedFactor=d.speedFactor||1;
+trip.manualProgress=(d.manualProgress!==undefined)?d.manualProgress:null;
+recalc();updateUI();
+document.getElementById('fb').innerText='Live Connected - Controls affect tracking page';
+}else{
+setDoc(docRef,trip).then(()=>{document.getElementById('fb').innerText='Trip Created';});
+}
+});
+setInterval(function(){if(!trip.isPaused && trip.manualProgress===null)recalc();updateUI();},1000);
+}
+function updateUI(){
+var pos=interp(route,prog);
+if(!marker)marker=L.marker(pos,{icon}).addTo(map);else marker.setLatLng(pos);
+document.getElementById('prog').innerText=(prog*100).toFixed(2)+'%';
+document.getElementById('paused').innerText=trip.isPaused?'true':'false';
+document.getElementById('speed').innerText=trip.speedFactor+'x';
+document.getElementById('dist').innerText=(prog*42).toFixed(2)+' km / 42 km';
+document.getElementById('van').innerText=pos[0].toFixed(4)+', '+pos[1].toFixed(4)+' | '+ (trip.isPaused?'Paused':'Moving');
+}
+async function save(){if(!docRef)return;await setDoc(docRef,trip,{merge:true});}
+document.getElementById('bPause').addEventListener('click',async function(){trip.isPaused=true;trip.pausedAt=Date.now();await save();});
+document.getElementById('bPlay').addEventListener('click',async function(){if(!trip.isPaused)return;var now=Date.now();var pd=now-(trip.pausedAt||now);trip.accumulatedPause=(trip.accumulatedPause||0)+pd;trip.isPaused=false;trip.pausedAt=0;trip.manualProgress=null;await save();});
+document.getElementById('bRew').addEventListener('click',async function(){recalc();trip.manualProgress=Math.max(0,prog-0.10);trip.isPaused=false;trip.startTime=Date.now()-trip.manualProgress*trip.durationMs-trip.accumulatedPause;await save();setTimeout(async function(){trip.manualProgress=null;await save();},2000);});
+document.getElementById('bFF').addEventListener('click',async function(){recalc();trip.manualProgress=Math.min(0.95,prog+0.10);trip.isPaused=false;trip.startTime=Date.now()-trip.manualProgress*trip.durationMs-trip.accumulatedPause;await save();setTimeout(async function(){trip.manualProgress=null;await save();},2000);});
+document.getElementById('b2x').addEventListener('click',async function(){trip.speedFactor=2.5;trip.manualProgress=null;await save();});
+document.getElementById('b1x').addEventListener('click',async function(){trip.speedFactor=1;trip.manualProgress=null;await save();});
+document.getElementById('bReset').addEventListener('click',async function(){trip={startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1,manualProgress:null};await setDoc(docRef,trip);});
+init();
+</script></body></html>
