@@ -1,1 +1,43 @@
 
+<!DOCTYPE html>
+<html>
+<head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - Allan/DF/110 - FULL CONTROL</title><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><script src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js'></script><script src='https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js'></script><style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}body{background:#f1f5f9}
+.company-head{text-align:center;background:#fff;color:#0a2540;font-weight:900;font-size:14px;padding:9px;border-bottom:1px solid #e2e8f0}
+header{position:relative;padding:12px 14px;color:#fff;background:#0a2540;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,50,0.97) 0%,rgba(7,25,50,0.80) 100%),url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1600&auto=format&fit=crop');background-size:cover;background-position:center;z-index:0}
+.hdr{position:relative;z-index:2;max-width:1300px;margin:0 auto}
+.header-top{display:flex;justify-content:space-between;gap:10px}
+.left-group{display:flex;gap:11px}.logo{width:52px;height:52px;background:#fff;border-radius:13px;display:grid;place-items:center;flex-shrink:0}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;margin-left:63px}.uk-badge{font-size:11px;font-weight:700;background:#eef2ff;padding:6px 12px;border-radius:20px;border:1px solid #dbe2ff;color:#0a2540}
+.admin-card{max-width:1300px;margin:14px auto 0;padding:0 12px}
+.admin-inner{background:#fff;color:#0a2540;border-radius:16px;padding:16px;border:2px solid #dc2626}
+.admin-inner b{font-size:13px}button{border:0;padding:11px 15px;border-radius:10px;font-weight:800;cursor:pointer;margin:4px}.p{background:#dc2626;color:#fff}.r{background:#16a34a;color:#fff}.y{background:#f59e0b;color:#000}.b{background:#2563eb;color:#fff}.g{background:#f1f5f9;border:1px solid #e2e8f0}
+.main{max-width:1300px;margin:14px auto;padding:0 12px;display:flex;gap:18px;flex-wrap:wrap}
+.left-col{flex:1 1 620px;display:flex;flex-direction:column;gap:14px}
+.map-card{background:#fff;padding:9px;border-radius:20px;border:2px solid #0a2540}
+.map-square{width:100%;height:480px;border-radius:12px;overflow:hidden}#map{width:100%;height:100%}
+.route-box{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:16px;border-left:4px solid #0a2540}
+.route-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex-shrink:0}
+.dot-done{background:#0a2540;color:#fff}.dot-prog{background:#f59e0b;color:#000}.dot-pend{background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0}
+.stat{margin-left:auto;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px}
+.s-done{background:#dcfce7;color:#166534}.s-prog{background:#fef3c7;color:#92400e}.s-pend{background:#f1f5f9;color:#94a3b8}
+.info{background:#fff;border-radius:18px;padding:16px;border:1px solid #e2e8f0}
+.badge{display:inline-flex;background:#eef2ff;padding:8px 12px;border-radius:20px;font-size:12px;border:1px solid #dbe2ff;color:#0a2540;font-weight:600;margin:4px;word-break:break-all}
+.badge.dark{background:#0a2540;color:#fff}
+.right-col{flex:0 1 360px;max-width:400px;display:flex;flex-direction:column;gap:10px;width:100%}
+.vehicle-img-card{background:#fff;padding:8px;border-radius:20px;border:1px solid #e2e8f0;overflow:hidden}
+.vehicle-img{width:100%;height:230px;object-fit:cover;border-radius:12px;display:block}
+.vbox{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.vbox b{font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:#64748b;line-height:1}
+.vbox span{font-size:13px;font-weight:700;color:#0a2540;word-break:break-word;line-height:1.35}
+@media(max-width:900px){.main{flex-direction:column}.right-col{max-width:100%}.meta-row{margin-left:0}}
+</style></head><body>
+<div class="company-head">ADMIN VIEW - Trust Logistics UK - Allan/DF/110</div>
+<header><div class="hdr"><div class="header-top"><div class="left-group"><div class="logo"><svg viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="white"/><text x="50" y="62" text-anchor="middle" font-weight="900" font-size="38" fill="#0a2540">TL</text></svg></div><div><h2 style="font-size:19px;font-weight:900">REF: Allan/DF/110 [ADMIN]</h2><div style="font-size:12px;color:#cbd5e1;margin-top:3px">Stockton TS17 6QR → 8 Wansbeck Street, Morpeth NE61 1XZ</div></div></div></div><div class="meta-row"><span class="uk-badge" id="ukClock">--</span><span class="uk-badge" id="speedBadge">-- km/h</span><span class="uk-badge" id="originBadge">Stockton [54.5611,-1.3038]</span><span class="uk-badge" id="destBadge">8 Wansbeck St [55.16792,-1.68842]</span></div></div></header>
+
+<div class="admin-card"><div class="admin-inner"><b>PACKAGE MOVEMENT CONTROL (Admin only - controls tracking.html)</b><br><br>
+<button class="p" onclick="pause()">⏸ Pause</button>
+<button class="r" onclick="resume()">▶ Resume</button>
+<button class="y" onclick="move(-0.10)">⏪ Rewind -10%</
