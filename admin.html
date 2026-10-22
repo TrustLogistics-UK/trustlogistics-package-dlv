@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - Allan/DF/110 - FULL CONTROL</title><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><script src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js'></script><script src='https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js'></script><style>
+<head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - Allan/DF/110 - FULL CONTROL</title><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'></script><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js'></script><style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}body{background:#f1f5f9}
 .company-head{text-align:center;background:#fff;color:#0a2540;font-weight:900;font-size:14px;padding:9px;border-bottom:1px solid #e2e8f0}
 header{position:relative;padding:12px 14px;color:#fff;background:#0a2540;overflow:hidden}
@@ -44,7 +44,7 @@ header::before{content:'';position:absolute;inset:0;background:linear-gradient(9
 <button class="g" onclick="speed(1)">Normal</button>
 <button class="b" onclick="speed(2.5)">Fast 2.5x</button>
 <button class="g" onclick="restart()">🔄 Restart to Stockton</button>
-<div id="s" style="margin-top:12px;background:#f8fafc;padding:10px;border-radius:8px;font-size:12px;border:1px solid #e2e8f0">Connecting...</div>
+<div id="s" style="margin-top:12px;background:#f8fafc;padding:10px;border-radius:8px;font-size:12px;border:1px solid #e2e8f0">Connecting to Firebase...</div>
 
 <a href="tracking.html" target="_blank" style="text-decoration:none;display:block;margin-top:14px">
 <button style="width:100%;background:#0a2540;color:#fff;padding:15px;border-radius:10px;font-weight:900;font-size:15px">🔗 Go to Tracking Page → See Customer View</button>
@@ -52,7 +52,6 @@ header::before{content:'';position:absolute;inset:0;background:linear-gradient(9
 <a href="index.html" target="_blank" style="text-decoration:none;display:block;margin-top:8px">
 <button style="width:100%;background:#fff;color:#0a2540;border:2px solid #0a2540;padding:12px;border-radius:10px;font-weight:800">Go to Home Page</button>
 </a>
-
 </div></div>
 
 <div class="main"><div class="left-col"><div class="map-card"><div class="map-square"><div id="map"></div></div></div><div class="route-box"><div style="font-size:12px;font-weight:900;margin-bottom:10px">ROUTE PROGRESS</div><div class="route-item"><div class="dot dot-pend" id="rdot-stockton">O</div>Stockton (Thornaby) - Start<div class="stat s-pend" id="rstat-stockton">Pending</div></div><div class="route-item"><div class="dot dot-pend" id="rdot-clear">O</div>A19 / A1 Clear Road<div class="stat s-pend" id="rstat-clear">Pending</div></div><div class="route-item"><div class="dot dot-pend" id="rdot-moor">O</div>Moor Lane<div class="stat s-pend" id="rstat-moor">Pending</div></div><div class="route-item"><div class="dot dot-pend" id="rdot-morpeth">O</div>8 Wansbeck Street - Destination<div class="stat s-pend" id="rstat-morpeth">Pending</div></div></div><div class="info"><h4>Shipment Allan/DF/110 • Range Rover</h4><div style="margin-top:6px"><span class="badge dark" id="status">Live 0%</span><span class="badge" id="eta">ETA: -</span><span class="badge" id="pos">Package: [54.5611, -1.3038]</span><span class="badge" id="roadInfo">Road: Thornaby</span></div></div></div><div class="right-col"><div class="vehicle-img-card"><img class="vehicle-img" src="defender.jpg" onerror="this.src='https://images.unsplash.com/photo-1605893477799-b99e3b93fe?q=80&w=800&auto=format&fit=crop'"></div>
@@ -74,6 +73,7 @@ function roadLabel(p){if(p<0.12)return 'Stockton (Thornaby) TS17 6QR';if(p>=0.45
 function updateBox(p){var segs=[{end:0.12,d:'rdot-stockton',s:'rstat-stockton'},{end:0.45,d:'rdot-clear',s:'rstat-clear'},{end:0.60,d:'rdot-moor',s:'rstat-moor'},{end:1.0,d:'rdot-morpeth',s:'rstat-morpeth'}];var cur=segs.findIndex(function(s){return p < s.end});if(cur===-1)cur=3;segs.forEach(function(seg,i){var d=document.getElementById(seg.d),st=document.getElementById(seg.s);if(!d||!st)return;if(i<cur){d.className='dot dot-done';d.innerText='✓';st.className='stat s-done';st.innerText='Done';}else if(i===cur){d.className='dot dot-prog';d.innerText='›';st.className='stat s-prog';st.innerText='In Progress';}else{d.className='dot dot-pend';d.innerText='○';st.className='stat s-pend';st.innerText='Pending';}});}
 setInterval(function(){var el=document.getElementById('ukClock');if(el)el.innerText=new Date().toLocaleString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' UK';},1000);
 
+// === SAME CONFIG AS YOUR WORKING TRACKING.HTML ===
 const firebaseConfig = {
   apiKey: "AIzaSyAIiwQf65fHuMEYueD4XAHVGYadKPTXdo8",
   authDomain: "trustlogistics-package-dlv-100.firebaseapp.com",
@@ -85,10 +85,34 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
-const docRef=db.collection("packages").doc("ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH");
-let t={}; let trip={startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1,manualProgress:null};
+// FIXED: Now uses trips (same as tracking.html) not packages
+const docRef=db.collection("trips").doc("ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH");
 
-docRef.onSnapshot(s=>{ if(!s.exists()){docRef.set({startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1});return;} t=s.data(); trip.startTime=t.startTime||trip.startTime; trip.durationMs=t.durationMs||trip.durationMs; trip.isPaused=!!t.isPaused; trip.pausedAt=t.pausedAt||0; trip.accumulatedPause=t.accumulatedPause||0; trip.speedFactor=(t.speedFactor===0||!t.speedFactor)?1:t.speedFactor; trip.manualProgress=(t.manualProgress!==undefined)?t.manualProgress:null; let p=t.manualProgress!=null?t.manualProgress:(()=>{let e=t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause);e*=(t.speedFactor||1);return Math.min(Math.max(e/t.durationMs,0),0.998)})(); document.getElementById('s').innerHTML=(t.isPaused?'PAUSED':'LIVE')+' | '+(p*100).toFixed(1)+'% | Speed '+t.speedFactor+'x';},e=>{document.getElementById('s').innerHTML='Error: '+e.message+'<br>Go to Firebase → Firestore → Create DB in Test Mode';});
+let t={}; 
+let trip={startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1,manualProgress:null};
+
+docRef.onSnapshot(s=>{ 
+  if(!s.exists()){
+    docRef.set({startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1,manualProgress:null});
+    return;
+  } 
+  t=s.data(); 
+  trip.startTime=t.startTime||trip.startTime; 
+  trip.durationMs=t.durationMs||trip.durationMs; 
+  trip.isPaused=!!t.isPaused; 
+  trip.pausedAt=t.pausedAt||0; 
+  trip.accumulatedPause=t.accumulatedPause||0; 
+  trip.speedFactor=(t.speedFactor===0||!t.speedFactor)?1:t.speedFactor; 
+  trip.manualProgress=(t.manualProgress!==undefined)?t.manualProgress:null; 
+  let p=t.manualProgress!=null?t.manualProgress:(()=>{
+    let e=t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause);
+    e*=(t.speedFactor||1);
+    return Math.min(Math.max(e/t.durationMs,0),0.998)
+  })(); 
+  document.getElementById('s').innerHTML=(t.isPaused?'PAUSED':'LIVE')+' | '+(p*100).toFixed(1)+'% | Speed '+t.speedFactor+'x | Doc: trips/ALLAN_DF_110...';
+},e=>{
+  document.getElementById('s').innerHTML='Error: '+e.message+'<br>Go to Firebase → Firestore → Create DB → Test Mode → Allow read/write';
+});
 
 function getProgress(){if(trip.manualProgress!==null)return Math.min(Math.max(trip.manualProgress,0),0.998);var elapsed=trip.isPaused?(trip.pausedAt-trip.startTime-trip.accumulatedPause):(Date.now()-trip.startTime-trip.accumulatedPause);elapsed*=trip.speedFactor;var p=elapsed/trip.durationMs;if(p>0.998)p=0.998;if(p<0)p=0;return p;}
 async function getRoute(){try{var r=await fetch('https://router.project-osrm.org/route/v1/driving/'+STOCKTON[1]+','+STOCKTON[0]+';'+MORPETH[1]+','+MORPETH[0]+'?overview=full&geometries=geojson');var j=await r.json();if(j.routes&&j.routes[0]&&j.routes[0].geometry.coordinates.length>10){route=j.routes[0].geometry.coordinates.map(function(c){return[c[1],c[0]]});}else{route=FALLBACK_ROUTE;}}catch(e){route=FALLBACK_ROUTE;}drawBase();}
@@ -98,7 +122,7 @@ setInterval(tick,1000);
 
 function pause(){if(!t.isPaused)docRef.update({isPaused:true,pausedAt:Date.now()});}
 function resume(){if(t.isPaused)docRef.update({isPaused:false,accumulatedPause:(t.accumulatedPause||0)+(Date.now()-(t.pausedAt||Date.now())),pausedAt:0});}
-function move(d){let p=t.manualProgress!=null?t.manualProgress:(()=>{let e=t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause);e*=(t.speedFactor||1);return e/t.durationMs})();let np=Math.min(Math.max(p+d,0),0.98);docRef.update({manualProgress:np});setTimeout(()=>{docRef.update({manualProgress:firebase.firestore.FieldValue.delete()});},4000);}
+function move(d){let p=t.manualProgress!=null?t.manualProgress:(()=>{let e=t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause);e*=(t.speedFactor||1);return e/t.durationMs})();let np=Math.min(Math.max(p+d,0),0.98);docRef.update({manualProgress:np});setTimeout(()=>{docRef.update({manualProgress:firebase.firestore.FieldValue.delete(),accumulatedPause:0,startTime:Date.now() - np*t.durationMs});},3500);}
 function speed(f){docRef.update({speedFactor:f});}
-function restart(){if(confirm('Restart to Stockton?'))docRef.set({startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1});}
+function restart(){if(confirm('Restart to Stockton? This will reset tracking.html too'))docRef.set({startTime:Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1,manualProgress:firebase.firestore.FieldValue.delete()});}
 </script></body></html>
