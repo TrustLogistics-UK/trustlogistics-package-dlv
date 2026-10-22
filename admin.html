@@ -1,23 +1,18 @@
-<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Admin - Allan/DF/110</title><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'></script><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js'></script><style>*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}body{background:#0f172a}.company-head{text-align:center;background:#fff;color:#0a2540;font-weight:900;padding:9px;font-size:14px}header{padding:12px 14px;background:#0a2540;color:#fff}.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.badge2{background:#eef2ff;color:#0a2540;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700}.admin-box{background:#fff;margin:12px;border-radius:16px;padding:16px;border:2px solid #dc2626;color:#0a2540}button{border:0;padding:11px 15px;border-radius:10px;font-weight:800;cursor:pointer;margin:4px}.p{background:#dc2626;color:#fff}.r{background:#16a34a;color:#fff}.y{background:#f59e0b;color:#000}.b{background:#2563eb;color:#fff}.g{background:#f1f5f9;border:1px solid #e2e8f0}#map{height:420px;width:100%;border-radius:12px}.info{background:#fff;margin:12px;border-radius:16px;padding:12px;border:1px solid #e2e8f0;color:#0a2540}.badge{display:inline-block;background:#eef2ff;padding:6px 12px;border-radius:20px;font-size:12px;margin:3px}.dark{background:#0a2540;color:#fff}</style></head><body>
-<div class="company-head">ADMIN - Uses same TRIPS collection as your working tracking.html</div>
-<header><div style="font-weight:900">REF: Allan/DF/110 [ADMIN]</div><div class="meta"><span class="badge2" id="ukClock">--</span><span class="badge2" id="conn">Connecting to trips...</span><span class="badge2" id="progTop">0%</span></div></header>
-
-<div class="admin-box"><b>CONTROLS - This will control your tracking.html</b><br><br>
-<button class="p" onclick="pause()">⏸ Pause - tracking will show Not Moving</button>
-<button class="r" onclick="resume()">▶ Resume</button><br>
-<button class="y" onclick="move(-0.10)">⏪ Rewind 10%</button>
-<button class="b" onclick="move(0.10)">⏩ Forward 10%</button><br>
-<button class="g" onclick="speed(1)">Normal Speed</button>
-<button class="b" onclick="speed(2.5)">Fast 2.5x</button>
-<button class="g" onclick="restart()">🔄 Restart to Stockton 0%</button>
-<div id="status" style="margin-top:12px;background:#f8fafc;padding:10px;border-radius:8px;font-size:12px;border:1px solid #e2e8f0">Connecting...</div>
-<a href="tracking.html" target="_blank"><button style="width:100%;background:#0a2540;color:#fff;margin-top:12px;padding:14px">🔗 Open Tracking Page</button></a>
+<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>ADMIN - CONNECTED TO TRACKING</title><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'></script><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js'></script><style>body{background:#0f172a;color:#fff;font-family:Arial;padding:12px}.box{background:#fff;color:#0a2540;border-radius:16px;padding:16px;margin:12px 0}button{padding:12px 16px;border:0;border-radius:10px;font-weight:800;margin:4px;cursor:pointer}.p{background:#dc2626;color:#fff}.r{background:#16a34a;color:#fff}.b{background:#2563eb;color:#fff}.g{background:#e2e8f0;color:#0a2540}#map{height:350px;border-radius:12px}</style></head><body>
+<h3>ADMIN - Connected to SAME doc as tracking.html</h3>
+<div class="box">
+<div id="log" style="background:#f8fafc;padding:10px;border-radius:8px;font-size:12px;border:1px solid #e2e8f0">Starting... open tracking.html first to create doc</div><br>
+<button class="p" onclick="pause()">⏸ PAUSE - Tracking will show Not Moving</button>
+<button class="r" onclick="resume()">▶ RESUME</button><br>
+<button class="b" onclick="move(-0.1)">⏪ -10%</button>
+<button class="b" onclick="move(0.1)">⏩ +10%</button>
+<button class="g" onclick="speed(1)">Speed 1x</button>
+<button class="b" onclick="speed(2.5)">Speed 2.5x</button>
+<button class="g" onclick="restart()">🔄 Restart 0%</button>
+<br><br><a href="tracking.html" target="_blank"><button style="width:100%;background:#0a2540;color:#fff">Open Tracking</button></a>
 </div>
-<div style="margin:12px"><div id="map"></div></div>
-<div class="info"><span class="badge dark" id="live">Live 0%</span><span class="badge" id="pos">--</span><span class="badge" id="road">--</span></div>
-
+<div class="box"><div id="map"></div><div id="info" style="margin-top:10px;font-size:12px"></div></div>
 <script>
-setInterval(()=>{let e=document.getElementById('ukClock');if(e)e.innerText=new Date().toLocaleString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' UK';},1000);
 const firebaseConfig = {
   apiKey: "AIzaSyAIiwQf65fHuMEYueD4XAHVGYadKPTXdo8",
   authDomain: "trustlogistics-package-dlv-100.firebaseapp.com",
@@ -37,29 +32,30 @@ const map=L.map('map').setView([54.8,-1.35],9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let line=L.polyline(route,{color:'#4285F4',weight:5}).addTo(map);
 let van=L.marker(route[0],{icon:L.divIcon({html:'🚚',className:'',iconSize:[30,30]})}).addTo(map);
-async function load(){try{let r=await fetch(`https://router.project-osrm.org/route/v1/driving/${START[1]},${START[0]};${END[1]},${END[0]}?overview=full&geometries=geojson`);let j=await r.json();if(j.routes){route=j.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);line.setLatLngs(route);map.fitBounds(line.getBounds());}}catch(e){}}
-load();
 
-let t={};
-docRef.onSnapshot(s=>{
-  if(!s.exists()){document.getElementById('status').innerText='No doc yet - tracking.html will create it. Open tracking.html first.';return;}
-  t=s.data();
+let t=null;
+function updLog(msg){document.getElementById('log').innerText=msg;}
+
+docRef.onSnapshot(snap=>{
+  if(!snap.exists()){
+    updLog('trips doc does NOT exist yet. Open your tracking.html once - it will create it automatically with docRef.set(). Then reload this admin.');
+    return;
+  }
+  t=snap.data();
   let p=t.manualProgress!=null?t.manualProgress:((t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause))*(t.speedFactor||1)/t.durationMs);
   p=Math.min(Math.max(p,0),0.998);
-  document.getElementById('status').innerText=(t.isPaused?'PAUSED':'LIVE')+' | '+(p*100).toFixed(1)+'% | Speed '+(t.speedFactor||1)+'x | Connected to TRIPS collection ✓';
-  document.getElementById('conn').innerText=(t.isPaused?'PAUSED':'LIVE')+' '+(p*100).toFixed(1)+'%';
-  document.getElementById('progTop').innerText=(p*100).toFixed(1)+'%';
-  document.getElementById('live').innerText='Live '+(p*100).toFixed(1)+'%';
+  updLog('✓ CONNECTED TO TRACKING!\nCollection: trips\nDoc: ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH\nisPaused: '+t.isPaused+'\nspeedFactor: '+t.speedFactor+'\nProgress: '+(p*100).toFixed(2)+'%\n\nNow click PAUSE - your tracking.html will show Not Moving instantly.');
+  document.getElementById('info').innerText='Progress '+(p*100).toFixed(1)+'% - '+(t.isPaused?'PAUSED':'LIVE');
   let idx=p*(route.length-1),i=Math.floor(idx),f=idx-i;if(i>=route.length-1){i=route.length-2;f=1;}
   let lat=route[i][0]+(route[i+1][0]-route[i][0])*f;let lng=route[i][1]+(route[i+1][1]-route[i][1])*f;
   van.setLatLng([lat,lng]);
-  document.getElementById('pos').innerText=lat.toFixed(4)+', '+lng.toFixed(4);
-  document.getElementById('road').innerText=t.isPaused?'Not Moving':(p<0.5?'A19':'A1(M)');
-},e=>{document.getElementById('status').innerText='ERROR: '+e.message;});
+},err=>{
+  updLog('FIRESTORE ERROR: '+err.message+'\nCode: '+err.code+'\n\nGo to Firebase Console > Firestore > Rules and make sure you Published allow read,write if true');
+});
 
-function pause(){if(!t.isPaused)docRef.update({isPaused:true,pausedAt:Date.now()});}
-function resume(){if(t.isPaused)docRef.update({isPaused:false,accumulatedPause:(t.accumulatedPause||0)+(Date.now()-(t.pausedAt||0)),pausedAt:0});}
-function move(d){let p=t.manualProgress!=null?t.manualProgress:((t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause))*(t.speedFactor||1)/t.durationMs);let np=Math.min(Math.max(p+d,0),0.98);docRef.update({manualProgress:np});setTimeout(()=>{docRef.update({manualProgress:firebase.firestore.FieldValue.delete(),startTime:Date.now()-np*t.durationMs/(t.speedFactor||1),accumulatedPause:0});},3000);}
-function speed(s){docRef.update({speedFactor:s});}
-function restart(){if(confirm('Restart to 0% Stockton?'))docRef.update({startTime:Date.now(),accumulatedPause:0,pausedAt:0,isPaused:false,speedFactor:1,manualProgress:firebase.firestore.FieldValue.delete()});}
+function pause(){if(t&&!t.isPaused)docRef.update({isPaused:true,pausedAt:Date.now()}).then(()=>updLog('Sent PAUSE to trips'));else if(!t)alert('Doc not loaded yet - open tracking.html first');}
+function resume(){if(t&&t.isPaused)docRef.update({isPaused:false,accumulatedPause:(t.accumulatedPause||0)+(Date.now()-(t.pausedAt||0)),pausedAt:0}).then(()=>updLog('Sent RESUME')); }
+function move(d){if(!t)return;let p=t.manualProgress!=null?t.manualProgress:((t.isPaused?(t.pausedAt-t.startTime-t.accumulatedPause):(Date.now()-t.startTime-t.accumulatedPause))*(t.speedFactor||1)/t.durationMs);let np=Math.min(Math.max(p+d,0),0.98);docRef.update({manualProgress:np});setTimeout(()=>{docRef.update({manualProgress:firebase.firestore.FieldValue.delete(),startTime:Date.now()-np*t.durationMs/(t.speedFactor||1),accumulatedPause:0});},3000);}
+function speed(s){if(t)docRef.update({speedFactor:s});}
+function restart(){if(confirm('Restart to Stockton 0%?'))docRef.update({startTime:Date.now(),accumulatedPause:0,pausedAt:0,isPaused:false,speedFactor:1,manualProgress:firebase.firestore.FieldValue.delete()});}
 </script></body></html>
