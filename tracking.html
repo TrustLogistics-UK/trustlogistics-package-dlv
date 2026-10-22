@@ -28,25 +28,20 @@ header{background:#0a2540;color:#fff;padding:12px 16px;display:flex;justify-cont
 <div><b>TrustLogistics</b><div style="font-size:10px;opacity:.7">Allan/DF/110 • H43245/IMEI/1001</div></div>
 <div><button onclick="logout()" style="background:#fff;color:#0a2540;border:none;padding:6px 12px;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer">Logout</button></div>
 </header>
-
 <div id="map"></div>
-
 <div class="info">
-<div class="row"><span>Status</span><b><span id="state" class="badge moving">Moving</span></b></div>
-<div class="row"><span>Speed</span><b id="speed">62 mph</b></div>
-<div class="row"><span>Current Road</span><b id="road">A19</b></div>
-<div class="row"><span>ETA Morpeth</span><b id="eta">Calculating...</b></div>
+<div class="row"><span>Status</span><b><span id="state" class="badge moving">Connecting...</span></b></div>
+<div class="row"><span>Speed</span><b id="speed">--</b></div>
+<div class="row"><span>Current Road</span><b id="road">--</b></div>
+<div class="row"><span>ETA Morpeth</span><b id="eta">--</b></div>
 <div class="row"><span>Vehicle</span><b>Defender - Stockton → Morpeth</b></div>
 <div class="bar"><div id="progress"></div></div>
 <div style="margin-top:10px"><img src="./defender.jpg" style="width:100%;border-radius:12px;max-height:200px;object-fit:cover" onerror="this.style.display='none'"></div>
 </div>
-
 <script>
-// --- LOGIN CHECK ---
 if(localStorage.getItem('trust_track')!=='yes'){location.href='./index.html';}
 function logout(){localStorage.removeItem('trust_track');location.href='./index.html';}
 
-// --- FIREBASE - KEEP YOUR OWN CONFIG HERE ---
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -56,26 +51,24 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const docRef = db.collection('trips').doc('ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH');
 
-// --- ROUTE Stockton to Morpeth via A19/A1 ---
 const route = [
-[54.570, -1.310], // Stockton
-[54.700, -1.300], // A19
+[54.570, -1.310],
+[54.700, -1.300],
 [54.900, -1.400],
-[55.050, -1.550], // A1
-[55.150, -1.690], // Morpeth
+[55.050, -1.550],
+[55.150, -1.690],
 ];
 const map = L.map('map').setView([54.8, -1.35], 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 L.polyline(route,{color:'#0066ff',weight:5}).addTo(map);
 const vanMarker = L.marker(route[0],{icon:L.divIcon({html:'🚚',className:'',iconSize:[30,30]})}).addTo(map);
 
-// --- FIX 1: DON'T RESTART ON REFRESH ---
-var SAVED_START = parseInt(localStorage.getItem('tl_shared_start_thornton')||'0');
-var trip={startTime:SAVED_START || Date.now(),durationMs:4*60*60*1000,isPaused:false,pausedAt:0,accumulatedPause:0,speedFactor:1,manualProgress:null};
-if(!SAVED_START) localStorage.setItem('tl_shared_start_thornton', String(trip.startTime));
+// TRACKING IS READ-ONLY - NO localStorage, NO Date.now()
+var trip = null; // will come from Firebase only
 
 function getProgress(){
-  if(trip.manualProgress!==null) return Math.min(1, Math.max(0, trip.manualProgress));
+  if(!trip) return 0;
+  if(trip.manualProgress!==null && trip.manualProgress!==undefined) return Math.min(1, Math.max(0, trip.manualProgress));
   if(trip.isPaused){
     var elapsedPause = (trip.pausedAt - trip.startTime - trip.accumulatedPause);
     return Math.min(1, elapsedPause / trip.durationMs);
@@ -85,8 +78,8 @@ function getProgress(){
 }
 
 function tick(){
+  if(!trip) return; // wait for Firebase
   var p = getProgress();
-  // Interpolate position
   var idx = p * (route.length-1);
   var i = Math.floor(idx);
   var f = idx - i;
@@ -94,11 +87,7 @@ function tick(){
   var lat = route[i][0] + (route[i+1][0]-route[i][0])*f;
   var lng = route[i][1] + (route[i+1][1]-route[i][1])*f;
   vanMarker.setLatLng([lat,lng]);
-
-  // Progress bar
   document.getElementById('progress').style.width = (p*100)+'%';
-
-  // FIX 2: PAUSE = NOT MOVING
   var isStopped = trip.isPaused || p>=1;
   if(isStopped){
     document.getElementById('speed').innerText = 'Not Moving';
@@ -117,26 +106,17 @@ function tick(){
   }
 }
 
-setInterval(tick, 1000);
-
-// Firebase sync
+// ONLY LISTEN - NEVER WRITE
 docRef.onSnapshot(function(snap){
   if(snap.exists()){
-    var d=snap.data();
-    trip.startTime=d.startTime||trip.startTime;
-    trip.durationMs=d.durationMs||trip.durationMs;
-    trip.isPaused=!!d.isPaused;
-    trip.pausedAt=d.pausedAt||0;
-    trip.accumulatedPause=d.accumulatedPause||0;
-    trip.speedFactor=d.speedFactor||1;
-    trip.manualProgress=(d.manualProgress!==undefined)?d.manualProgress:null;
+    trip = snap.data();
   } else {
-    // Create doc once so refresh doesn't restart
-    docRef.set(trip).catch(()=>{});
+    document.getElementById('state').innerText = 'Waiting for Admin to start trip';
+    document.getElementById('state').className = 'badge stopped';
   }
 });
 
-tick();
+setInterval(tick, 1000);
 </script>
 </body>
 </html>
