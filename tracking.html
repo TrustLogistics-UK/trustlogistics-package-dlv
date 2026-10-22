@@ -12,7 +12,7 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial,sans-serif}
 body{background:#f1f5f9}
 header{background:#0a2540;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
-#map{height:55vh;width:100%}
+#map{height:50vh;width:100%}
 .info{background:#fff;margin:12px;border-radius:16px;padding:16px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
 .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
 .row b{color:#0a2540}
@@ -21,6 +21,11 @@ header{background:#0a2540;color:#fff;padding:12px 16px;display:flex;justify-cont
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
 .moving{background:#dcfce7;color:#166534}
 .stopped{background:#fee2e2;color:#991b1b}
+.vbox{background:#fff;margin:12px;border-radius:16px;padding:12px 16px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid #e2e8f0}
+.vbox b{display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.vbox span{font-size:13px;font-weight:700;color:#0a2540;word-break:break-all}
+.vehicle-img-card{background:#fff;margin:12px;padding:8px;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden}
+.vehicle-img{width:100%;height:230px;object-fit:cover;border-radius:12px;display:block}
 </style>
 </head>
 <body>
@@ -33,17 +38,26 @@ header{background:#0a2540;color:#fff;padding:12px 16px;display:flex;justify-cont
 
 <div class="info">
 <div class="row"><span>Status</span><b><span id="state" class="badge moving">Connecting...</span></b></div>
+<div class="row"><span>Progress Covered</span><b id="percent">0.00% Live</b></div>
 <div class="row"><span>Speed</span><b id="speed">--</b></div>
 <div class="row"><span>Current Road</span><b id="road">--</b></div>
 <div class="row"><span>ETA Morpeth</span><b id="eta">--</b></div>
+<div class="row"><span>Van Location</span><b id="vanLoc">--</b></div>
 <div class="row"><span>Vehicle</span><b>Defender - Stockton → Morpeth</b></div>
 <div class="bar"><div id="progress"></div></div>
-<div style="margin-top:10px"><img src="./defender.jpg" style="width:100%;border-radius:12px;max-height:200px;object-fit:cover" onerror="this.style.display='none'"></div>
 </div>
+
+<!-- TRUCK DETAILS AT BOTTOM -->
+<div class="vehicle-img-card"><img class="vehicle-img" src="./defender.jpg" alt="Defender 110 Grey" onerror="this.style.display='none'"></div>
+<div class="vbox"><b>Vehicle</b><span>Land Rover Defender 110</span></div>
+<div class="vbox"><b>Color</b><span>Grey</span></div>
+<div class="vbox"><b>Plates Record</b><span>76 plates recorded for sales</span></div>
+<div class="vbox"><b>REF / VIN</b><span>Allan/DF/110 • H43245/IMEI/1001</span></div>
+<div class="vbox"><b>Route</b><span>Stockton [54.570,-1.310] → Morpeth [55.150,-1.690] via OSRM</span></div>
 
 <script>
 if(localStorage.getItem('trust_track')!=='yes'){location.href='./index.html';}
-function logout(){location.href='./index.html';} // FIXED: Don't delete trip on logout
+function logout(){location.href='./index.html';}
 
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -54,10 +68,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const docRef = db.collection('trips').doc('ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH');
 
-// --- OSRM REAL ROAD ---
-const START=[54.570, -1.310]; // Stockton
-const END=[55.150, -1.690]; // Morpeth
-let route = [START, END]; // fallback
+const START=[54.570, -1.310];
+const END=[55.150, -1.690];
+let route = [START, END];
 
 const map = L.map('map').setView([54.8, -1.35], 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -74,13 +87,11 @@ async function loadOSRM(){
       routeLine.setLatLngs(route);
       map.fitBounds(routeLine.getBounds(),{padding:[20,20]});
     }
-  }catch(e){ console.log('OSRM fallback',e); }
+  }catch(e){}
 }
 loadOSRM();
 
-// --- FIXED LOGIC: FIREBASE IS TRUTH, NOT localStorage ---
 var trip = null;
-
 function getProgress(){
   if(!trip) return 0;
   if(trip.manualProgress!==null && trip.manualProgress!==undefined) return Math.min(1, Math.max(0, trip.manualProgress));
@@ -92,6 +103,8 @@ function getProgress(){
   return Math.min(1, Math.max(0, elapsed / trip.durationMs));
 }
 
+function formatUK(d){return d.toLocaleString('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+' UK';}
+
 function tick(){
   if(!trip) return;
   var p = getProgress();
@@ -102,32 +115,35 @@ function tick(){
   var lat = route[i][0] + (route[i+1][0]-route[i][0])*f;
   var lng = route[i][1] + (route[i+1][1]-route[i][1])*f;
   vanMarker.setLatLng([lat,lng]);
+
+  // LIVE READINGS
   document.getElementById('progress').style.width = (p*100)+'%';
+  document.getElementById('percent').innerText = (p*100).toFixed(2)+'% Live';
+  document.getElementById('vanLoc').innerText = lat.toFixed(4)+', '+lng.toFixed(4);
+
   var isStopped = trip.isPaused || p>=1;
   if(isStopped){
     document.getElementById('speed').innerText = 'Not Moving';
     document.getElementById('road').innerText = 'Not Moving';
-    document.getElementById('eta').innerText = 'Not Moving';
-    document.getElementById('state').innerText = 'Not Moving';
+    document.getElementById('eta').innerText = p>=1 ? 'Arrived' : 'Not Moving';
+    document.getElementById('state').innerText = p>=1 ? 'Arrived' : 'Not Moving';
     document.getElementById('state').className = 'badge stopped';
   } else {
     document.getElementById('speed').innerText = (55 + Math.round(Math.random()*10)) + ' mph';
     document.getElementById('road').innerText = p < 0.5 ? 'A19' : 'A1(M)';
     var remainingMs = (1-p)*trip.durationMs;
-    var mins = Math.round(remainingMs/60000);
-    document.getElementById('eta').innerText = mins + ' mins to Morpeth';
-    document.getElementById('state').innerText = 'Moving';
+    var etaDate = new Date(Date.now()+remainingMs);
+    document.getElementById('eta').innerText = formatUK(etaDate) + ' ('+Math.round(remainingMs/60000)+' mins)';
+    document.getElementById('state').innerText = 'Moving - '+(p*100).toFixed(1)+'%';
     document.getElementById('state').className = 'badge moving';
   }
 }
 setInterval(tick, 1000);
 
-// --- FIREBASE LISTEN ONLY, CREATE ONLY ONCE ---
 docRef.onSnapshot(function(snap){
   if(snap.exists()){
     trip = snap.data();
   } else {
-    // Create ONCE in Firebase - this time will then persist forever across refresh/logout
     var initialTrip = {
       startTime: Date.now(),
       durationMs: 4*60*60*1000,
