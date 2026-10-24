@@ -1,0 +1,24 @@
+<!DOCTYPE html><html><body style="font-family:Arial;padding:30px"><h2>Fixing TrustLogistics_Package_del...</h2><div id="log">Connecting...</div><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'></script><script src='https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js'></script><script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAIiwQf65fHuMEYueD4XAHVGYadKPTXdo8",
+  authDomain: "trustlogistics-package-dlv-100.firebaseapp.com",
+  projectId: "trustlogistics-package-dlv-100",
+  storageBucket: "trustlogistics-package-dlv-100.firebasestorage.app",
+  messagingSenderId: "799430273591",
+  appId: "1:799430273591:web:7fddd4d369b33ac224edb2"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+db.collection('trips').doc('ALLAN_DF_110_SHARED_TRIP_STOCKTON_WANSBECK_MORPETH').set({
+  accumulatedPause: 0,
+  pausedAt: 0,
+  isPaused: false,
+  speedFactor: 1,
+  durationMs: 14400000,
+  startTime: Date.now()
+}).then(()=>{
+  document.getElementById('log').innerHTML='<h3 style="color:green">✅ DONE! Your database is now fixed!</h3>Collection: trips<br>Doc: ALLAN_DF_110...<br>All fields are correct type (number/boolean)<br><br><b>Now:</b><br>1. Go to Firestore Data tab - you will see NEW collection <b>trips</b> appeared<br>2. You can now delete old collection <b>packages</b> if you want<br>3. Open tracking.html - will move<br>4. Open admin.html - will say CONNECTED';
+}).catch(e=>{
+  document.getElementById('log').innerHTML='<h3 style="color:red">❌ Failed: '+e.message+'</h3><br>Go to Firestore > Rules tab > click PUBLISH first, then open this file again.';
+});
+</script></body></html>
